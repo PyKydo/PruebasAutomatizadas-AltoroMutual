@@ -69,17 +69,10 @@ public class SolicitudTarjetaStepDefinitions {
         wait.until(ExpectedConditions.elementToBeClickable(By.xpath(xpath))).click();
     }
 
-    @Then("se muestra el mensaje de aprobación en {string} con {string}")
-    public void seMuestraElMensajeDeAprobacionEnCon(String xpath, String mensajeEsperado) {
+    @Then("se muestra el mensaje de solicitud en {string} con {string}")
+    public void seMuestraElMensajeDeSolicitudEnCon(String xpath, String mensajeEsperado) {
         WebElement mensaje = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(xpath)));
         String texto = mensaje.getText().trim();
-        assertTrue(texto.contains(mensajeEsperado), "El mensaje de aprobación obtenido no contiene el texto esperado.");
-    }
-
-    @Then("se muestra el mensaje de error de solicitud en {string} con {string}")
-    public void seMuestraElMensajeDeErrorDeSolicitudEnCon(String xpath, String mensajeEsperado) {
-        WebElement mensaje = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(xpath)));
-        String texto = mensaje.getText().trim();
-        assertTrue(texto.contains(mensajeEsperado), "El mensaje de error obtenido no contiene el texto esperado.");
+        assertTrue(texto.contains(mensajeEsperado), "El mensaje obtenido no contiene el texto esperado.");
     }
 }
