@@ -81,15 +81,15 @@ public class TransferenciaStepDefinitions {
         wait.until(ExpectedConditions.elementToBeClickable(By.xpath(xpath))).click();
     }
 
-    @Then("el mensaje en {string} contiene {string}")
-    public void elMensajeEnContiene(String xpath, String mensajeEsperado) {
+    @Then("el mensaje de transferencia en {string} contiene {string}")
+    public void elMensajeDeTransferenciaEnContiene(String xpath, String mensajeEsperado) {
         WebElement message = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(xpath)));
         String texto = message.getText().trim();
         assertTrue(texto.contains(mensajeEsperado), "El mensaje obtenido no contiene el texto esperado: " + mensajeEsperado);
     }
 
-    @Then("se muestra una alerta con el mensaje {string}")
-    public void seMuestraUnaAlertaConElMensaje(String mensajeEsperado) {
+    @Then("se muestra una alerta de transferencia con el mensaje {string}")
+    public void seMuestraUnaAlertaDeTransferenciaConElMensaje(String mensajeEsperado) {
         Alert alerta = wait.until(ExpectedConditions.alertIsPresent());
         String textoAlerta = alerta.getText();
         assertTrue(textoAlerta.contains(mensajeEsperado), "El texto de la alerta no coincide con lo esperado.");

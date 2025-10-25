@@ -11,7 +11,7 @@ Feature: Transferencia de fondos entre cuentas
     And selecciona la cuenta destino "<cuenta_destino>" en el selector "//select[@id='toAccount']"
     And ingresa "<monto>" en el campo de monto "//input[@id='transferAmount']"
     And confirma la transferencia con el botón "//input[@id='transfer']"
-    Then el mensaje en "//span[@id='_ctl0__ctl0_Content_Main_postResp']" contiene "<mensaje_esperado>"
+    Then el mensaje de transferencia en "//span[@id='_ctl0__ctl0_Content_Main_postResp']" contiene "<mensaje_esperado>"
 
     Examples:
       | cuenta_origen | cuenta_destino | monto | mensaje_esperado                                 |
@@ -22,4 +22,4 @@ Feature: Transferencia de fondos entre cuentas
     And selecciona la cuenta destino "800002" en el selector "//select[@id='toAccount']"
     And ingresa "100" en el campo de monto "//input[@id='transferAmount']"
     And confirma la transferencia con el botón "//input[@id='transfer']"
-    Then se muestra una alerta con el mensaje "From Account and To Account fields cannot be the same."
+    Then se muestra una alerta de transferencia con el mensaje "From Account and To Account fields cannot be the same."
