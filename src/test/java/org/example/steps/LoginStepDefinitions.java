@@ -83,20 +83,20 @@ public class LoginStepDefinitions {
         }
     }
 
-    @Then("se muestra el mensaje de {string} en {string}")
-    public void seMuestraElMensaje(String tipoMensaje, String xpath) {
+    @Then("se muestra un mensaje en {string}")
+    public void seMuestraUnMensaje(String xpath) {
         try {
             WebElement mensaje = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(xpath)));
-            assertTrue(mensaje.isDisplayed(), "No se mostró el mensaje esperado de " + tipoMensaje);
+            assertTrue(mensaje.isDisplayed(), "No se mostró el mensaje esperado.");
         } catch (Exception e) {
-            System.out.println("No se pudo encontrar el elemento: " + xpath + " para el mensaje de " + tipoMensaje);
+            System.out.println("No se pudo encontrar el elemento: " + xpath);
             try {
                 Alert alert = driver.switchTo().alert();
                 System.out.println("Alerta encontrada: " + alert.getText());
                 alert.accept();
             } catch (NoAlertPresentException ex) {
             }
-            assertTrue(false, "Fallo al verificar el mensaje: " + tipoMensaje);
+            assertTrue(false, "Fallo al verificar el mensaje en: " + xpath);
         }
     }
 
