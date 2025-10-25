@@ -13,3 +13,7 @@ Feature: Búsqueda y navegación de contenido
   Scenario: Navegación por secciones
     When navega a la sección mediante el enlace "//a[@id='LinkHeader2']"
     Then el encabezado "//h1" contiene "Personal"
+
+  Scenario: Navegación a la sección de negocios
+    When navega a la sección mediante el enlace "//a[@id='LinkHeader3']"
+    Then el encabezado "//h1" contiene "Small Business"

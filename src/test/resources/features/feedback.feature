@@ -14,5 +14,6 @@ Feature: Envío de feedback al banco
   Then el mensaje de feedback en "//body/table/tbody/tr[2]/td[2]/div/p" contiene "<mensaje_esperado>"
 
     Examples:
-      | nombre     | email                | asunto   | mensaje                             | mensaje_esperado                         |
-      | Juan Perez | juan.perez@gmail.com | Consulta | Tengo una consulta sobre mi cuenta. | Thank you for your comments, Juan Perez. |
+      | nombre     | email                | asunto   | mensaje                             | mensaje_esperado                                    |
+      | Juan Perez | juan.perez@gmail.com | Consulta | Tengo una consulta sobre mi cuenta. | Thank you for your comments, Juan Perez.            |
+      | Juan Perez | juan.perez@          | Consulta | Mensaje con email inválido.         | However, the email you gave is incorrect            |

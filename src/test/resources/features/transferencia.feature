@@ -14,8 +14,9 @@ Feature: Transferencia de fondos entre cuentas
     Then el mensaje de transferencia en "//span[@id='_ctl0__ctl0_Content_Main_postResp']" contiene "<mensaje_esperado>"
 
     Examples:
-      | cuenta_origen | cuenta_destino | monto | mensaje_esperado                                 |
-      | 800002        | 800003         | 100   | was successfully transferred from Account 800002 |
+      | cuenta_origen    | cuenta_destino | monto | mensaje_esperado                                          |
+      | 800002           | 800003         | 100   | was successfully transferred from Account 800002          |
+      | 4539082039396288 | 800003         | 50    | was successfully transferred from Account 4539082039396288 |
 
   Scenario: Evita transferencia con la misma cuenta origen y destino
     When selecciona la cuenta origen "800002" en el selector "//select[@id='fromAccount']"
@@ -23,3 +24,10 @@ Feature: Transferencia de fondos entre cuentas
     And ingresa "100" en el campo de monto "//input[@id='transferAmount']"
     And confirma la transferencia con el botón "//input[@id='transfer']"
     Then se muestra una alerta de transferencia con el mensaje "From Account and To Account fields cannot be the same."
+
+  Scenario: Evita transferencia con monto inválido
+    When selecciona la cuenta origen "800002" en el selector "//select[@id='fromAccount']"
+    And selecciona la cuenta destino "800003" en el selector "//select[@id='toAccount']"
+    And ingresa "0" en el campo de monto "//input[@id='transferAmount']"
+    And confirma la transferencia con el botón "//input[@id='transfer']"
+    Then se muestra una alerta de transferencia con el mensaje "Transfer Amount must be a number greater than 0."
