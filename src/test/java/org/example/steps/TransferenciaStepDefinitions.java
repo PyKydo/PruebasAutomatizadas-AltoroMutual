@@ -55,6 +55,7 @@ public class TransferenciaStepDefinitions {
         transferLink.click();
     }
 
+
     @When("selecciona la cuenta origen {string} en el selector {string}")
     public void seleccionaLaCuentaOrigenEnElSelector(String cuenta, String xpath) {
         WebElement fromAccount = wait.until(ExpectedConditions.elementToBeClickable(By.xpath(xpath)));
