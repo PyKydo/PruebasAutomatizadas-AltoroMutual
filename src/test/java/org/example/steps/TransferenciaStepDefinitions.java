@@ -1,26 +1,98 @@
 package org.example.steps;
 
+import io.cucumber.java.AfterAll;
+import io.cucumber.java.BeforeAll;
 import io.cucumber.java.en.And;
+import io.cucumber.java.en.Given;
+import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import io.github.bonigarcia.wdm.WebDriverManager;
+import org.openqa.selenium.Alert;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.Select;
+import org.openqa.selenium.support.ui.WebDriverWait;
+
+import java.time.Duration;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class TransferenciaStepDefinitions {
-    @And("accede a la sección de transferencias mediante el enlace \\/\\/a[@id={string}]")
-    public void accedeALaSeccionDeTransferenciasMedianteElEnlaceAIdTransferLink() {
+
+    private static WebDriver driver;
+    private static WebDriverWait wait;
+
+    @BeforeAll
+    public static void setUp() {
+        WebDriverManager.chromedriver().setup();
+        driver = new ChromeDriver();
+        driver.manage().window().maximize();
+        wait = new WebDriverWait(driver, Duration.ofSeconds(10));
     }
 
-    @When("selecciona la cuenta origen {string} en el selector \\/\\/select[@id={string}]")
-    public void seleccionaLaCuentaOrigenEnElSelectorSelectIdFromAccount(String arg0) {
+    @AfterAll
+    public static void tearDown() {
+        if (driver != null) {
+            driver.quit();
+        }
     }
 
-    @And("selecciona la cuenta destino {string} en el selector \\/\\/select[@id={string}]")
-    public void seleccionaLaCuentaDestinoEnElSelectorSelectIdToAccount(String arg0) {
+    @Given("el usuario ha iniciado sesión")
+    public void elUsuarioHaIniciadoSesion() {
+        driver.get("https://demo.testfire.net/login.jsp");
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("uid"))).sendKeys("jsmith");
+        driver.findElement(By.id("passw")).sendKeys("demo1234");
+        driver.findElement(By.name("btnSubmit")).click();
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("MenuHyperLink3"))); // wait for the authenticated navigation menu
     }
 
-    @And("ingresa {string} en el campo de monto \\/\\/input[@id={string}]")
-    public void ingresaEnElCampoDeMontoInputIdTransferAmount(String arg0, String arg1) {
+    @And("accede a la sección de transferencias mediante el enlace {string}")
+    public void accedeALaSeccionDeTransferenciasMedianteElEnlace(String xpath) {
+        WebElement transferLink = wait.until(ExpectedConditions.elementToBeClickable(By.xpath(xpath)));
+        transferLink.click();
     }
 
-    @And("confirma la transferencia con el botón \\/\\/input[@id={string} and @name={string} and @type={string}]")
-    public void confirmaLaTransferenciaConElBotonInputIdTransferAndNameTransferAndTypeSubmit() {
+    @When("selecciona la cuenta origen {string} en el selector {string}")
+    public void seleccionaLaCuentaOrigenEnElSelector(String cuenta, String xpath) {
+        WebElement fromAccount = wait.until(ExpectedConditions.elementToBeClickable(By.xpath(xpath)));
+        Select fromAccountSelect = new Select(fromAccount);
+        fromAccountSelect.selectByValue(cuenta);
+    }
+
+    @And("selecciona la cuenta destino {string} en el selector {string}")
+    public void seleccionaLaCuentaDestinoEnElSelector(String cuenta, String xpath) {
+        WebElement toAccount = wait.until(ExpectedConditions.elementToBeClickable(By.xpath(xpath)));
+        Select toAccountSelect = new Select(toAccount);
+        toAccountSelect.selectByValue(cuenta);
+    }
+
+    @And("ingresa {string} en el campo de monto {string}")
+    public void ingresaEnElCampoDeMonto(String monto, String xpath) {
+        WebElement amountField = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(xpath)));
+        amountField.clear();
+        amountField.sendKeys(monto);
+    }
+
+    @And("confirma la transferencia con el botón {string}")
+    public void confirmaLaTransferenciaConElBoton(String xpath) {
+        wait.until(ExpectedConditions.elementToBeClickable(By.xpath(xpath))).click();
+    }
+
+    @Then("el mensaje en {string} contiene {string}")
+    public void elMensajeEnContiene(String xpath, String mensajeEsperado) {
+        WebElement message = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(xpath)));
+        String texto = message.getText().trim();
+        assertTrue(texto.contains(mensajeEsperado), "El mensaje obtenido no contiene el texto esperado: " + mensajeEsperado);
+    }
+
+    @Then("se muestra una alerta con el mensaje {string}")
+    public void seMuestraUnaAlertaConElMensaje(String mensajeEsperado) {
+        Alert alerta = wait.until(ExpectedConditions.alertIsPresent());
+        String textoAlerta = alerta.getText();
+        assertTrue(textoAlerta.contains(mensajeEsperado), "El texto de la alerta no coincide con lo esperado.");
+        alerta.accept();
     }
 }
