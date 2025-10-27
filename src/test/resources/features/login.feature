@@ -12,9 +12,9 @@ Feature: Autenticación de usuario en el sistema
     Then se muestra un mensaje en "<xpath_mensaje>"
 
     Examples:
-      | usuario   | contraseña   | xpath_mensaje                                     |
-      | jsmith    | demo1234     | //a[normalize-space()='Sign Off']                 |
-      | admin     | admin        | //a[normalize-space()='Sign Off']                 |
-      | fakeuser  | fakepass     | //span[@id='_ctl0__ctl0_Content_Main_message']    |
-      |           |              | //span[@id='_ctl0__ctl0_Content_Main_message']    |
-      | jsmith    | incorrecta   | //span[@id='_ctl0__ctl0_Content_Main_message']    |
+      | usuario      | contraseña  | xpath_mensaje                                  |
+      | jsmith       | demo1234    | //a[normalize-space()='Sign Off']              |
+      | admin        | admin       | //a[normalize-space()='Sign Off']              |
+      | usuariofalso | contrafalsa | //span[@id='_ctl0__ctl0_Content_Main_message'] |
+      |              |             | //span[@id='_ctl0__ctl0_Content_Main_message'] |
+      | jsmith       | incorrecta  | //span[@id='_ctl0__ctl0_Content_Main_message'] |
