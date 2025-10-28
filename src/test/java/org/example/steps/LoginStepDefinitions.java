@@ -36,22 +36,19 @@ public class LoginStepDefinitions {
     public void elUsuarioEstaEnLaPaginaDeLogin(String url) {
         try {
             driver.get(url);
-            // Handle potential initial alert
             try {
                 Alert alert = driver.switchTo().alert();
                 System.out.println("Alerta encontrada al cargar la página: " + alert.getText());
                 alert.accept();
             } catch (NoAlertPresentException e) {
-                // No alert present, continue
             }
         } catch (org.openqa.selenium.UnhandledAlertException e) {
             try {
                 Alert alert = driver.switchTo().alert();
                 System.out.println("Alerta no manejada encontrada: " + alert.getText());
                 alert.accept();
-                driver.get(url); // Re-try getting the URL
+                driver.get(url);
             } catch (NoAlertPresentException ex) {
-                // No alert present, continue
             }
         }
     }
