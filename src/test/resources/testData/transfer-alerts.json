@@ -1,0 +1,5 @@
+{
+  "mismatchedAccounts": "From Account must be different than To Account.",
+  "sameAccount": "From Account and To Account fields cannot be the same.",
+  "invalidAmount": "Transfer Amount must be a number greater than 0."
+}

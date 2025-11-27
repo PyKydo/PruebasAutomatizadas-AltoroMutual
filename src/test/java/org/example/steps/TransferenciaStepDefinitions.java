@@ -1,99 +1,58 @@
 package org.example.steps;
 
-import io.cucumber.java.AfterAll;
-import io.cucumber.java.BeforeAll;
-import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
-import io.github.bonigarcia.wdm.WebDriverManager;
-import org.openqa.selenium.Alert;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.Select;
-import org.openqa.selenium.support.ui.WebDriverWait;
-
-import java.time.Duration;
+import org.example.pages.LoginPage;
+import org.example.pages.TransferPage;
+import org.example.utils.ConfigLoader;
+import org.example.utils.JsonDataProvider;
+import org.example.utils.TestContext;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class TransferenciaStepDefinitions {
 
-    private static WebDriver driver;
-    private static WebDriverWait wait;
+    private final TestContext context;
 
-    @BeforeAll
-    public static void setUp() {
-        WebDriverManager.chromedriver().setup();
-        driver = new ChromeDriver();
-        driver.manage().window().maximize();
-        wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+    public TransferenciaStepDefinitions(TestContext context) {
+        this.context = context;
     }
 
-    @AfterAll
-    public static void tearDown() {
-        if (driver != null) {
-            driver.quit();
-        }
+    private LoginPage loginPage() {
+        return context.getPage(LoginPage.class);
     }
 
-    @Given("el usuario ha iniciado sesión")
-    public void elUsuarioHaIniciadoSesion() {
-        driver.get("https://demo.testfire.net/login.jsp");
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("uid"))).sendKeys("jsmith");
-        driver.findElement(By.id("passw")).sendKeys("demo1234");
-        driver.findElement(By.name("btnSubmit")).click();
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("MenuHyperLink3"))); // wait for the authenticated navigation menu
+    private TransferPage transferPage() {
+        return context.getPage(TransferPage.class);
     }
 
-    @And("accede a la sección de transferencias mediante el enlace {string}")
-    public void accedeALaSeccionDeTransferenciasMedianteElEnlace(String xpath) {
-        WebElement transferLink = wait.until(ExpectedConditions.elementToBeClickable(By.xpath(xpath)));
-        transferLink.click();
+    @Given("el usuario autenticado accede a transferencias")
+    public void elUsuarioAutenticadoAccedeATransferencias() {
+        loginPage().openLoginPage();
+        loginPage().performLogin(ConfigLoader.get("app.username"), ConfigLoader.get("app.password"));
+        transferPage().openTransferSection();
     }
 
-
-    @When("selecciona la cuenta origen {string} en el selector {string}")
-    public void seleccionaLaCuentaOrigenEnElSelector(String cuenta, String xpath) {
-        WebElement fromAccount = wait.until(ExpectedConditions.elementToBeClickable(By.xpath(xpath)));
-        Select fromAccountSelect = new Select(fromAccount);
-        fromAccountSelect.selectByValue(cuenta);
+    @When("realiza una transferencia desde {string} hacia {string} por {string}")
+    public void realizaUnaTransferenciaDesdeHaciaPor(String cuentaOrigen, String cuentaDestino, String monto) {
+        transferPage().selectFromAccount(cuentaOrigen);
+        transferPage().selectToAccount(cuentaDestino);
+        transferPage().setAmount(monto);
+        transferPage().submitTransfer();
     }
 
-    @And("selecciona la cuenta destino {string} en el selector {string}")
-    public void seleccionaLaCuentaDestinoEnElSelector(String cuenta, String xpath) {
-        WebElement toAccount = wait.until(ExpectedConditions.elementToBeClickable(By.xpath(xpath)));
-        Select toAccountSelect = new Select(toAccount);
-        toAccountSelect.selectByValue(cuenta);
+    @Then("el mensaje de transferencia contiene {string}")
+    public void elMensajeDeTransferenciaContiene(String mensajeEsperado) {
+        assertTrue(transferPage().getResponseMessage().contains(mensajeEsperado),
+                () -> "El mensaje no contiene: " + mensajeEsperado);
     }
 
-    @And("ingresa {string} en el campo de monto {string}")
-    public void ingresaEnElCampoDeMonto(String monto, String xpath) {
-        WebElement amountField = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(xpath)));
-        amountField.clear();
-        amountField.sendKeys(monto);
-    }
-
-    @And("confirma la transferencia con el botón {string}")
-    public void confirmaLaTransferenciaConElBoton(String xpath) {
-        wait.until(ExpectedConditions.elementToBeClickable(By.xpath(xpath))).click();
-    }
-
-    @Then("el mensaje de transferencia en {string} contiene {string}")
-    public void elMensajeDeTransferenciaEnContiene(String xpath, String mensajeEsperado) {
-        WebElement message = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(xpath)));
-        String texto = message.getText().trim();
-        assertTrue(texto.contains(mensajeEsperado), "El mensaje obtenido no contiene el texto esperado: " + mensajeEsperado);
-    }
-
-    @Then("se muestra una alerta de transferencia con el mensaje {string}")
-    public void seMuestraUnaAlertaDeTransferenciaConElMensaje(String mensajeEsperado) {
-        Alert alerta = wait.until(ExpectedConditions.alertIsPresent());
-        String textoAlerta = alerta.getText();
-        assertTrue(textoAlerta.contains(mensajeEsperado), "El texto de la alerta no coincide con lo esperado.");
-        alerta.accept();
+    @Then("la alerta de transferencia muestra {string}")
+    public void laAlertaDeTransferenciaMuestra(String alertaKey) {
+        String expected = JsonDataProvider.getValue("transfer-alerts.json", alertaKey);
+        String actual = transferPage().acceptAlertText();
+        assertTrue(actual.contains(expected),
+                () -> "Se esperaba alerta: " + expected + " pero se obtuvo: " + actual);
     }
 }

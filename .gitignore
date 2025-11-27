@@ -40,3 +40,7 @@ build/
 
 ### AJ ###
 src/main/resources/
+
+### Guia ###
+docs/
+proyecto-guia/

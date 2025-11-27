@@ -1,78 +1,65 @@
 package org.example.steps;
 
-import io.cucumber.java.AfterAll;
-import io.cucumber.java.BeforeAll;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
-import io.github.bonigarcia.wdm.WebDriverManager;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
+import org.example.pages.LoginPage;
+import org.example.pages.SolicitudTarjetaPage;
+import org.example.utils.ConfigLoader;
+import org.example.utils.TestContext;
 
-import java.time.Duration;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class SolicitudTarjetaStepDefinitions {
 
-    private static WebDriver driver;
-    private static WebDriverWait wait;
+    private static final Map<String, String> RESULT_MESSAGES = Map.of(
+            "aprobado", "Your new Altoro Mutual Gold VISA",
+            "rechazado", "Login Failed: We're sorry"
+    );
 
-    @BeforeAll
-    public static void setUp() {
-        WebDriverManager.chromedriver().setup();
-        driver = new ChromeDriver();
-        driver.manage().window().maximize();
-        wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+    private final TestContext context;
+
+    public SolicitudTarjetaStepDefinitions(TestContext context) {
+        this.context = context;
     }
 
-    @AfterAll
-    public static void tearDown() {
-        if (driver != null) {
-            driver.quit();
+    private LoginPage loginPage() {
+        return context.getPage(LoginPage.class);
+    }
+
+    private SolicitudTarjetaPage solicitudPage() {
+        return context.getPage(SolicitudTarjetaPage.class);
+    }
+
+    @Given("el usuario autenticado accede a la solicitud de tarjeta")
+    public void elUsuarioAutenticadoAccedeALaSolicitudDeTarjeta() {
+        LoginPage login = loginPage();
+        login.openLoginPage();
+        login.performLogin(ConfigLoader.get("app.username"), ConfigLoader.get("app.password"));
+        solicitudPage().openApplicationForm();
+    }
+
+    @When("ingresa la contraseña de solicitud {string}")
+    public void ingresaLaContrasenaDeSolicitud(String password) {
+        solicitudPage().typeApplicationPassword(password);
+    }
+
+    @And("envía la solicitud de tarjeta")
+    public void enviaLaSolicitudDeTarjeta() {
+        solicitudPage().submitApplication();
+    }
+
+    @Then("el mensaje de solicitud indica {string}")
+    public void elMensajeDeSolicitudIndica(String tipoResultado) {
+        String esperado = RESULT_MESSAGES.get(tipoResultado.toLowerCase());
+        if (esperado == null) {
+            throw new IllegalArgumentException("Resultado no soportado: " + tipoResultado);
         }
-    }
-
-    @Given("el usuario inicia sesión para la solicitud de tarjeta")
-    public void elUsuarioIniciaSesionParaLaSolicitudDeTarjeta() {
-        driver.get("https://demo.testfire.net/login.jsp");
-        WebElement usuario = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("uid")));
-        usuario.clear();
-        usuario.sendKeys("jsmith");
-        WebElement contrasena = driver.findElement(By.id("passw"));
-        contrasena.clear();
-        contrasena.sendKeys("demo1234");
-        driver.findElement(By.name("btnSubmit")).click();
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("MenuHyperLink3")));
-    }
-
-    @And("navega a la sección de solicitud mediante el enlace {string}")
-    public void navegaALaSeccionDeSolicitudMedianteElEnlace(String xpath) {
-        WebElement enlaceSolicitud = wait.until(ExpectedConditions.elementToBeClickable(By.xpath(xpath)));
-        enlaceSolicitud.click();
-    }
-
-    @When("ingresa la contraseña de solicitud {string} en el campo {string}")
-    public void ingresaLaContrasenaDeSolicitudEnElCampo(String contrasena, String xpath) {
-        WebElement campoContrasena = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(xpath)));
-        campoContrasena.clear();
-        campoContrasena.sendKeys(contrasena);
-    }
-
-    @And("envía la solicitud con el botón {string}")
-    public void enviaLaSolicitudConElBoton(String xpath) {
-        wait.until(ExpectedConditions.elementToBeClickable(By.xpath(xpath))).click();
-    }
-
-    @Then("se muestra el mensaje de solicitud en {string} con {string}")
-    public void seMuestraElMensajeDeSolicitudEnCon(String xpath, String mensajeEsperado) {
-        WebElement mensaje = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(xpath)));
-        String texto = mensaje.getText().trim();
-        assertTrue(texto.contains(mensajeEsperado), "El mensaje obtenido no contiene el texto esperado.");
+        String mensaje = solicitudPage().getApplicationMessage();
+        assertTrue(mensaje.contains(esperado),
+                () -> "El mensaje obtenido no coincide con el tipo esperado: " + tipoResultado);
     }
 }
