@@ -5,9 +5,7 @@ import java.io.InputStream;
 import java.util.Objects;
 import java.util.Properties;
 
-/**
- * Centraliza la lectura de propiedades ubicadas en src/test/resources/config.
- */
+
 public final class ConfigLoader {
 
     private static final String CONFIG_PATH = "config/test.properties";

@@ -6,11 +6,11 @@ Feature: Solicitud de la tarjeta Altoro Mutual Gold Visa
     Given el usuario autenticado accede a la solicitud de tarjeta
 
   Scenario Outline: Resultado de la solicitud de tarjeta
-    When ingresa la contraseña de solicitud "<clave>"
+    When ingresa la contraseña configurada "<caso_solicitud>"
     And envía la solicitud de tarjeta
-    Then el mensaje de solicitud indica "<resultado>"
+    Then el mensaje de solicitud coincide con los datos configurados
 
     Examples:
-      | clave                 | resultado  |
-      | demo1234             | aprobado   |
-      | contraseña_incorrecta | rechazado |
+      | caso_solicitud             |
+      | solicitud_tarjeta_aprobada |
+      | solicitud_tarjeta_rechazada |

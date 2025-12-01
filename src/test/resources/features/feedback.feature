@@ -6,11 +6,11 @@ Feature: Envío de feedback al banco
     Given el usuario abre el formulario de feedback
 
   Scenario Outline: Verificación del formulario de envío de feedback
-    When completa el formulario de feedback con nombre "<nombre>", email "<email>", asunto "<asunto>" y mensaje "<mensaje>"
+    When completa el formulario de feedback con los datos "<caso_feedback>"
     And envía el formulario de feedback
-    Then el mensaje de confirmación contiene "<mensaje_esperado>"
+    Then el mensaje de confirmación coincide con los datos configurados
 
     Examples:
-      | nombre     | email                | asunto   | mensaje                             | mensaje_esperado                                    |
-      | Juan Perez | juan.perez@gmail.com | Consulta | Tengo una consulta sobre mi cuenta. | Thank you for your comments, Juan Perez.            |
-      | Juan Perez | juan.perez@          | Consulta | Mensaje con email inválido.         | However, the email you gave is incorrect            |
+      | caso_feedback              |
+      | feedback_consulta_valido   |
+      | feedback_email_invalido    |

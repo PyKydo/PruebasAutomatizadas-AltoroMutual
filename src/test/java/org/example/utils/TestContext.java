@@ -8,9 +8,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-/**
- * Provee dependencias de escenario (driver y page objects) mediante PicoContainer.
- */
+
 public class TestContext {
 
     private final Map<Class<?>, Object> pageCache = new ConcurrentHashMap<>();

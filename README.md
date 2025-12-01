@@ -4,15 +4,26 @@ Suite de pruebas E2E en Java 21 + Cucumber que valida los flujos críticos del p
 
 ## Tabla de contenido
 
-1. [Sistema bajo prueba](#sistema-bajo-prueba)
-2. [Arquitectura de la solución](#arquitectura-de-la-solución)
-3. [Dependencias y herramientas](#dependencias-y-herramientas)
-4. [Estructura del proyecto](#estructura-del-proyecto)
-5. [Cobertura funcional](#cobertura-funcional)
-6. [Datos y configuración](#datos-y-configuración)
-7. [Ejecución de pruebas](#ejecución-de-pruebas)
-8. [Reportes y evidencias](#reportes-y-evidencias)
-9. [Buenas prácticas y extensibilidad](#buenas-prácticas-y-extensibilidad)
+- [Pruebas Automatizadas - Altoro Mutual](#pruebas-automatizadas---altoro-mutual)
+  - [Tabla de contenido](#tabla-de-contenido)
+  - [Sistema bajo prueba](#sistema-bajo-prueba)
+  - [Arquitectura de la solución](#arquitectura-de-la-solución)
+  - [Dependencias y herramientas](#dependencias-y-herramientas)
+  - [Estructura del proyecto](#estructura-del-proyecto)
+  - [Cobertura funcional](#cobertura-funcional)
+    - [`busqueda_navegacion.feature`](#busqueda_navegacionfeature)
+    - [`login.feature`](#loginfeature)
+    - [`consulta_saldo.feature`](#consulta_saldofeature)
+    - [`transferencia.feature`](#transferenciafeature)
+    - [`solicitud_tarjeta.feature`](#solicitud_tarjetafeature)
+    - [`feedback.feature`](#feedbackfeature)
+  - [Datos y configuración](#datos-y-configuración)
+  - [Ejecución de pruebas](#ejecución-de-pruebas)
+    - [Requisitos previos](#requisitos-previos)
+    - [Comandos principales](#comandos-principales)
+    - [Configuración de entornos](#configuración-de-entornos)
+  - [Reportes y evidencias](#reportes-y-evidencias)
+  - [Buenas prácticas y extensibilidad](#buenas-prácticas-y-extensibilidad)
 
 ## Sistema bajo prueba
 
@@ -26,7 +37,7 @@ Suite de pruebas E2E en Java 21 + Cucumber que valida los flujos críticos del p
 - **PicoContainer/TestContext:** cada escenario recibe sus dependencias (WebDriver, Pages, data providers) mediante inyección en el constructor de los Steps, eliminando estados estáticos.
 - **DriverFactory + Hooks:** las instancias de Chrome se crean endurecidas (modo incógnito, sin notificaciones). `Hooks` inicializa y cierra el navegador por escenario y adjunta capturas en caso de fallo.
 - **Configuración centralizada:** `ConfigLoader` consume `src/test/resources/config/test.properties` para parámetros de entorno, credenciales y timeouts.
-- **Datos externos:** validaciones dinámicas (por ejemplo, mensajes de transferencia) viven en `src/test/resources/testData/transfer-alerts.json` y se leen con `JsonDataProvider`.
+- **Datos externos:** todos los `Scenario Outline` consumen datos del Excel `src/test/resources/testData/data.xlsx`, abastecido exclusivamente por `ScenarioDataRepository`.
 - **Ejecución secuencial:** `junit-platform.properties` mantiene la paralelización desactivada para garantizar un único navegador por escenario.
 
 ## Dependencias y herramientas
@@ -40,7 +51,7 @@ Suite de pruebas E2E en Java 21 + Cucumber que valida los flujos críticos del p
 | Cucumber JVM | 7.14.0 | BDD + glue code (`cucumber-java`, `cucumber-junit-platform-engine`, `cucumber-picocontainer`) |
 | JUnit Platform | 1.10.0 | Orquestador de pruebas |
 | SLF4J + Logback | 2.0.9 / 1.4.11 | Logging uniforme |
-| Jackson Databind | 2.15.3 | Lectura de JSON |
+| Apache POI | 5.2.3 | Lectura del Excel `data.xlsx` |
 | Masterthought Report Plugin | 5.7.4 | Reporte HTML avanzado desde `cucumber.json` |
 
 ## Estructura del proyecto
@@ -59,14 +70,15 @@ Prueba 2/
 │     │  └─ org/example/utils/
 │     │        ├─ ConfigLoader.java
 │     │        ├─ DriverFactory.java
-│     │        ├─ JsonDataProvider.java
+│     │        ├─ ScenarioDataRepository.java
 │     │        └─ TestContext.java
 │     └─ resources
 │           ├─ config/test.properties
 │           ├─ cucumber.properties
 │           ├─ junit-platform.properties
 │           ├─ features/*.feature
-│           └─ testData/transfer-alerts.json
+│           └─ testData/
+│                 ├─ data.xlsx
 └─ target/
     ├─ cucumber-reports/
     ├─ cucumber-report-html/
@@ -93,7 +105,7 @@ Prueba 2/
 ### `transferencia.feature`
 
 - Transferencias exitosas entre cuentas de ahorro y tarjeta de crédito.
-- Mensajes de alerta cuando origen = destino o se ingresa un monto inválido (parametrizado vía JSON).
+- Mensajes de alerta cuando origen = destino o se ingresa un monto inválido (mensajes parametrizados en el Excel).
 
 ### `solicitud_tarjeta.feature`
 
@@ -107,8 +119,9 @@ Prueba 2/
 
 ## Datos y configuración
 
-- **`config/test.properties`:** contiene `app.baseUrl`, credenciales (`app.user`, `app.password`), navegador (`app.browser`) y `timeouts.*`. Cada valor puede sobrescribirse con `-Dapp.baseUrl=...` o variables de entorno.
-- **`testData/transfer-alerts.json`:** diccionario clave → mensaje esperado para escenarios negativos de transferencias (por ejemplo, `sameAccount`, `invalidAmount`).
+- **`config/test.properties`:** contiene `app.baseUrl`, credenciales (`app.username`, `app.password`), `timeout.seconds` y parámetros de reintento. Cada valor puede sobrescribirse con `-Dapp.baseUrl=...` o variables de entorno.
+- **Excel `src/test/resources/testData/data.xlsx`:** única fuente de datos para todos los `Scenario Outline`. Las hojas `LoginDatos`, `ConsultaSaldo`, `Feedback`, `SolicitudTarjeta` y `DatosUsuarios` almacenan los registros referenciados en las Examples a través de `dataId`.
+- **ScenarioDataRepository:** componente único que abstrae la lectura del Excel. Permite sobreescribir la ruta principal mediante `scenario.excel.path` y, en el caso de transferencias, admite `transfer.excel.path`/`transfer.excel.sheet` para apuntar a libros u hojas alternativas sin cambiar el código.
 - **`cucumber.properties`:** define `cucumber.plugin`, `cucumber.glue`, `cucumber.features` y desactiva la publicación externa (`cucumber.publish.enabled=false`).
 - **`junit-platform.properties`:** establece `cucumber.execution.parallel.enabled=false` para ejecuciones secuenciales y controladas.
 
@@ -147,7 +160,7 @@ Los navegadores se abren y cierran por escenario en los hooks `@Before`/`@After`
 ## Buenas prácticas y extensibilidad
 
 1. **Nuevas páginas:** cree una clase en `org.example.pages`, inyecte `WebDriver` vía constructor y exponga métodos semánticos; recupérela en los Steps usando `context.getPage(Pagina.class)`.
-2. **Datos externos:** agregue archivos JSON o `.properties` en `src/test/resources/testData/` y documente el formato para mantener escenarios limpios.
+2. **Datos externos:** registre los nuevos `dataId` directamente en `data.xlsx` y documente cualquier campo adicional que necesite cada Feature.
 3. **Tags y filtrado:** utilice etiquetas (`@Login`, `@Transferencia`, etc.) para ejecuciones focalizadas o pipelines paralelos.
 4. **Esperas explícitas:** reemplace `Thread.sleep` con utilidades ya presentes en `BasePage` para mayor estabilidad.
 5. **CI/CD:** incluya `mvn test` y `mvn verify` en el pipeline y publique los artefactos de `target/cucumber-reports` y `target/cucumber-report-html`.

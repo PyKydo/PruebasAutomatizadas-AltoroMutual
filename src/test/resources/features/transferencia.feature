@@ -2,23 +2,23 @@
 Feature: Transferencia de fondos entre cuentas
   El usuario autenticado puede transferir fondos entre sus cuentas para gestionar su dinero fácilmente.
 
-  Background:
-    Given el usuario autenticado accede a transferencias
-
-  Scenario Outline: Transferencia de fondos entre diferentes cuentas
-    When realiza una transferencia desde "<cuenta_origen>" hacia "<cuenta_destino>" por "<monto>"
-    Then el mensaje de transferencia contiene "<mensaje_esperado>"
+  Scenario Outline: Transferencia de fondos con estrategia híbrida
+    Given el usuario autenticado accede a transferencias con los datos "<data_id>"
+    When realiza la transferencia configurada
+    Then el mensaje de transferencia coincide con los datos configurados
 
     Examples:
-      | cuenta_origen    | cuenta_destino | monto | mensaje_esperado                                          |
-      | 800002           | 800003         | 100   | was successfully transferred from Account 800002          |
-      | 4539082039396288 | 800003         | 50    | was successfully transferred from Account 4539082039396288 |
+      | data_id                                   |
+      | transferencia_exitosa_principal           |
+      | transferencia_exitosa_tarjeta_origen      |
+      | transferencia_exitosa_destino_alternativo |
 
-  Scenario Outline: Validaciones de alerta durante la transferencia
-    When realiza una transferencia desde "<cuenta_origen>" hacia "<cuenta_destino>" por "<monto>"
-    Then la alerta de transferencia muestra "<clave_alerta>"
+  Scenario Outline: Validaciones de alertas con fuentes mixtas
+    Given el usuario autenticado accede a transferencias con los datos "<data_id>"
+    When realiza la transferencia configurada
+    Then la alerta de transferencia coincide con los datos configurados
 
     Examples:
-      | cuenta_origen | cuenta_destino | monto | clave_alerta     |
-      | 800002        | 800002         | 100   | sameAccount      |
-      | 800002        | 800003         | 0     | invalidAmount    |
+      | data_id                                |
+      | transferencia_alerta_mismas_cuentas    |
+      | transferencia_alerta_monto_invalido    |

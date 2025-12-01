@@ -7,9 +7,7 @@ import org.openqa.selenium.chrome.ChromeOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * Gestiona instancias de WebDriver por hilo de ejecución.
- */
+
 public final class DriverFactory {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DriverFactory.class);
