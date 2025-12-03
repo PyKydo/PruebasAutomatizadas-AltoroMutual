@@ -1,6 +1,6 @@
 package org.example.pages;
 
-import org.example.utils.ConfigLoader;
+import org.example.utils.Config;
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoAlertPresentException;
@@ -18,36 +18,36 @@ public class LoginPage extends BasePage {
         super(driver);
     }
 
-    public void openLoginPage() {
-        String loginUrl = ConfigLoader.get("app.baseUrl") + "/login.jsp";
-        navigateWithRetry(loginUrl);
-        dismissPotentialAlert();
+    public void abrirPortalLogin() {
+        String loginUrl = Config.config("app.baseUrl") + "/login.jsp";
+        navegarConReintentos(loginUrl);
+        descartarAlertaPendiente();
     }
 
-    public void performLogin(String username, String password) {
-        type(USERNAME_INPUT, username == null ? "" : username);
-        type(PASSWORD_INPUT, password == null ? "" : password);
-        click(SUBMIT_BUTTON);
-        dismissPotentialAlert();
+    public void ejecutarLogin(String username, String password) {
+        ingresarTexto(USERNAME_INPUT, username == null ? "" : username);
+        ingresarTexto(PASSWORD_INPUT, password == null ? "" : password);
+        hacerClick(SUBMIT_BUTTON);
+        descartarAlertaPendiente();
     }
 
-    public boolean isUserLoggedIn() {
+    public boolean usuarioAutenticado() {
         try {
-            return waitForVisibility(SIGN_OFF_LINK).isDisplayed();
+            return esperarVisibilidad(SIGN_OFF_LINK).isDisplayed();
         } catch (Exception e) {
             return false;
         }
     }
 
-    public boolean isErrorMessageVisible() {
+    public boolean mensajeErrorVisible() {
         try {
-            return waitForVisibility(ERROR_MESSAGE).isDisplayed();
+            return esperarVisibilidad(ERROR_MESSAGE).isDisplayed();
         } catch (Exception e) {
             return false;
         }
     }
 
-    private void dismissPotentialAlert() {
+    private void descartarAlertaPendiente() {
         try {
             Alert alert = driver.switchTo().alert();
             alert.accept();

@@ -1,6 +1,6 @@
 package org.example.pages;
 
-import org.example.utils.ConfigLoader;
+import org.example.utils.Config;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
@@ -19,39 +19,39 @@ public abstract class BasePage {
 
     protected BasePage(WebDriver driver) {
         this.driver = driver;
-        int timeout = ConfigLoader.getInt("timeout.seconds", 10);
+        int timeout = Config.configInt("timeout.seconds", 10);
         this.wait = new WebDriverWait(driver, Duration.ofSeconds(timeout));
-        this.navigationMaxAttempts = ConfigLoader.getInt("navigation.retry.maxAttempts", 3);
-        this.navigationDelayMillis = ConfigLoader.getInt("navigation.retry.delay.millis", 2000);
+        this.navigationMaxAttempts = Config.configInt("navigation.retry.maxAttempts", 3);
+        this.navigationDelayMillis = Config.configInt("navigation.retry.delay.millis", 2000);
     }
 
-    protected WebElement waitForVisibility(By locator) {
+    protected WebElement esperarVisibilidad(By locator) {
         return wait.until(ExpectedConditions.visibilityOfElementLocated(locator));
     }
 
-    protected WebElement waitForClickable(By locator) {
+    protected WebElement esperarElementoClickable(By locator) {
         return wait.until(ExpectedConditions.elementToBeClickable(locator));
     }
 
-    protected void type(By locator, String value) {
-        WebElement element = waitForVisibility(locator);
+    protected void ingresarTexto(By locator, String value) {
+        WebElement element = esperarVisibilidad(locator);
         element.clear();
         element.sendKeys(value);
     }
 
-    protected void click(By locator) {
-        waitForClickable(locator).click();
+    protected void hacerClick(By locator) {
+        esperarElementoClickable(locator).click();
     }
 
-    protected String getText(By locator) {
-        return waitForVisibility(locator).getText().trim();
+    protected String obtenerTexto(By locator) {
+        return esperarVisibilidad(locator).getText().trim();
     }
 
-    protected boolean isElementPresent(By locator) {
+    protected boolean estaElementoPresente(By locator) {
         return !driver.findElements(locator).isEmpty();
     }
 
-    protected void navigateWithRetry(String url) {
+    protected void navegarConReintentos(String url) {
         
         int attempts = 0;
         while (true) {
@@ -63,12 +63,12 @@ public abstract class BasePage {
                 if (attempts >= navigationMaxAttempts) {
                     throw ex;
                 }
-                sleepBeforeRetry();
+                pausarAntesDeReintentar();
             }
         }
     }
 
-    private void sleepBeforeRetry() {
+    private void pausarAntesDeReintentar() {
         try {
             Thread.sleep(navigationDelayMillis);
         } catch (InterruptedException e) {

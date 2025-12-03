@@ -15,19 +15,19 @@ public class ConsultaSaldoPage extends BasePage {
         super(driver);
     }
 
-    public void selectAccount(String value) {
-        new Select(waitForVisibility(ACCOUNT_LIST)).selectByValue(value);
+    public void seleccionarCuenta(String value) {
+        new Select(esperarVisibilidad(ACCOUNT_LIST)).selectByValue(value);
     }
 
-    public void requestHistory() {
-        click(GET_ACCOUNT_BUTTON);
+    public void solicitarHistorial() {
+        hacerClick(GET_ACCOUNT_BUTTON);
     }
 
-    public String getHistoryTitle() {
-        return getText(HISTORY_TITLE);
+    public String obtenerTituloHistorial() {
+        return obtenerTexto(HISTORY_TITLE);
     }
 
-    public String getBalanceValue() {
-        return getText(BALANCE_CELL);
+    public String obtenerSaldoFinal() {
+        return obtenerTexto(BALANCE_CELL);
     }
 }

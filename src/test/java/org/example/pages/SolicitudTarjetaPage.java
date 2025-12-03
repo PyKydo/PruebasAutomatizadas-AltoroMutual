@@ -15,22 +15,22 @@ public class SolicitudTarjetaPage extends BasePage {
         super(driver);
     }
 
-    public void openApplicationForm() {
-        click(APPLY_LINK);
+    public void abrirFormularioSolicitud() {
+        hacerClick(APPLY_LINK);
     }
 
-    public void typeApplicationPassword(String password) {
-        type(PASSWORD_INPUT, password == null ? "" : password);
+    public void ingresarClaveSolicitud(String password) {
+        ingresarTexto(PASSWORD_INPUT, password == null ? "" : password);
     }
 
-    public void submitApplication() {
-        click(SUBMIT_BUTTON);
+    public void enviarSolicitud() {
+        hacerClick(SUBMIT_BUTTON);
     }
 
-    public String getApplicationMessage() {
-        if (isElementPresent(SUCCESS_MESSAGE)) {
-            return getText(SUCCESS_MESSAGE);
+    public String obtenerMensajeSolicitud() {
+        if (estaElementoPresente(SUCCESS_MESSAGE)) {
+            return obtenerTexto(SUCCESS_MESSAGE);
         }
-        return getText(ERROR_MESSAGE);
+        return obtenerTexto(ERROR_MESSAGE);
     }
 }

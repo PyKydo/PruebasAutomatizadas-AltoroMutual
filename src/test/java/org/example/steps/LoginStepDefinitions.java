@@ -4,8 +4,8 @@ import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import org.example.pages.LoginPage;
-import org.example.utils.ScenarioDataRepository;
-import org.example.utils.TestContext;
+import org.example.utils.ExcelUtils;
+import org.example.utils.Config;
 
 import java.util.Locale;
 import java.util.Map;
@@ -14,26 +14,24 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class LoginStepDefinitions {
 
-    private final TestContext context;
     private Map<String, String> loginData;
 
-    public LoginStepDefinitions(TestContext context) {
-        this.context = context;
-    }
-
     private LoginPage loginPage() {
-        return context.getPage(LoginPage.class);
+        return Config.pagina(LoginPage.class);
     }
 
     @Given("el usuario abre la aplicación de Altoro Mutual")
     public void elUsuarioAbreLaAplicacion() {
-        loginPage().openLoginPage();
+        loginPage().abrirPortalLogin();
     }
 
     @When("inicia sesión con los datos {string}")
     public void iniciaSesionConLosDatos(String caso) {
-        loginData = ScenarioDataRepository.getLoginData(caso);
-        loginPage().performLogin(value(loginData, "usuario"), value(loginData, "contrasena"));
+        loginData = ExcelUtils.datosLogin(caso);
+        loginPage().ejecutarLogin(
+            value(loginData, "usuario"),
+            value(loginData, "password", "contrasena", "contraseña", "clave")
+        );
     }
 
     @Then("el resultado del login coincide con los datos configurados")
@@ -41,9 +39,9 @@ public class LoginStepDefinitions {
         ensureLoginData();
         boolean esperadoExitoso = "exitoso".equalsIgnoreCase(value(loginData, "resultado"));
         if (esperadoExitoso) {
-            assertTrue(loginPage().isUserLoggedIn(), "Se esperaba un login exitoso");
+            assertTrue(loginPage().usuarioAutenticado(), "Se esperaba un login exitoso");
         } else {
-            assertTrue(loginPage().isErrorMessageVisible(), "Se esperaba un mensaje de error");
+            assertTrue(loginPage().mensajeErrorVisible(), "Se esperaba un mensaje de error");
         }
     }
 
@@ -53,10 +51,20 @@ public class LoginStepDefinitions {
         }
     }
 
-    private String value(Map<String, String> data, String key) {
-        if (data == null) {
+    private String value(Map<String, String> data, String... keys) {
+        if (data == null || keys == null) {
             return "";
         }
-        return data.getOrDefault(key.toLowerCase(Locale.ROOT), "");
+        for (String key : keys) {
+            if (key == null) {
+                continue;
+            }
+            String normalized = key.toLowerCase(Locale.ROOT);
+            String value = data.get(normalized);
+            if (value != null && !value.isEmpty()) {
+                return value;
+            }
+        }
+        return "";
     }
 }

@@ -9,7 +9,7 @@ import org.openqa.selenium.Alert;
 
 import java.time.Duration;
 
-public class TransferPage extends BasePage {
+public class TransferenciaPage extends BasePage {
 
     private static final By TRANSFER_LINK = By.id("MenuHyperLink3");
     private static final By FROM_ACCOUNT_SELECT = By.id("fromAccount");
@@ -18,37 +18,37 @@ public class TransferPage extends BasePage {
     private static final By SUBMIT_BUTTON = By.id("transfer");
     private static final By RESPONSE_MESSAGE = By.id("_ctl0__ctl0_Content_Main_postResp");
 
-    public TransferPage(WebDriver driver) {
+    public TransferenciaPage(WebDriver driver) {
         super(driver);
     }
 
-    public void openTransferSection() {
-        click(TRANSFER_LINK);
+    public void abrirModuloTransferencias() {
+        hacerClick(TRANSFER_LINK);
         new WebDriverWait(driver, Duration.ofSeconds(5))
                 .until(ExpectedConditions.visibilityOfElementLocated(FROM_ACCOUNT_SELECT));
     }
 
-    public void selectFromAccount(String value) {
-        new Select(waitForVisibility(FROM_ACCOUNT_SELECT)).selectByValue(value);
+    public void seleccionarCuentaOrigen(String value) {
+        new Select(esperarVisibilidad(FROM_ACCOUNT_SELECT)).selectByValue(value);
     }
 
-    public void selectToAccount(String value) {
-        new Select(waitForVisibility(TO_ACCOUNT_SELECT)).selectByValue(value);
+    public void seleccionarCuentaDestino(String value) {
+        new Select(esperarVisibilidad(TO_ACCOUNT_SELECT)).selectByValue(value);
     }
 
-    public void setAmount(String amount) {
-        type(AMOUNT_INPUT, amount);
+    public void definirMonto(String amount) {
+        ingresarTexto(AMOUNT_INPUT, amount);
     }
 
-    public void submitTransfer() {
-        click(SUBMIT_BUTTON);
+    public void enviarTransferencia() {
+        hacerClick(SUBMIT_BUTTON);
     }
 
-    public String getResponseMessage() {
-        return getText(RESPONSE_MESSAGE);
+    public String obtenerMensajeTransferencia() {
+        return obtenerTexto(RESPONSE_MESSAGE);
     }
 
-    public String acceptAlertText() {
+    public String aceptarAlertaYObtenerTexto() {
         Alert alert = new WebDriverWait(driver, Duration.ofSeconds(5)).until(ExpectedConditions.alertIsPresent());
         String text = alert.getText();
         alert.accept();

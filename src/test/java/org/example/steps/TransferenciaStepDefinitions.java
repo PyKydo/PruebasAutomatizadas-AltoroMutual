@@ -4,10 +4,9 @@ import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import org.example.pages.LoginPage;
-import org.example.pages.TransferPage;
-import org.example.utils.ConfigLoader;
-import org.example.utils.ScenarioDataRepository;
-import org.example.utils.TestContext;
+import org.example.pages.TransferenciaPage;
+import org.example.utils.ExcelUtils;
+import org.example.utils.Config;
 
 import java.util.Locale;
 import java.util.Map;
@@ -16,38 +15,33 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class TransferenciaStepDefinitions {
 
-    private final TestContext context;
     private Map<String, String> transferenciaData;
 
-    public TransferenciaStepDefinitions(TestContext context) {
-        this.context = context;
-    }
-
     private LoginPage loginPage() {
-        return context.getPage(LoginPage.class);
+        return Config.pagina(LoginPage.class);
     }
 
-    private TransferPage transferPage() {
-        return context.getPage(TransferPage.class);
+    private TransferenciaPage transferPage() {
+        return Config.pagina(TransferenciaPage.class);
     }
 
     @Given("el usuario autenticado accede a transferencias con los datos {string}")
     public void elUsuarioAutenticadoAccedeATransferenciasConDatos(String dataId) {
         transferenciaData = loadTransferData(dataId);
-        String username = fallback("usuario", ConfigLoader.get("app.username"));
-        String password = fallback("password", ConfigLoader.get("app.password"));
-        loginPage().openLoginPage();
-        loginPage().performLogin(username, password);
-        transferPage().openTransferSection();
+        String username = fallback("usuario", Config.config("app.username"));
+        String password = fallback("password", Config.config("app.password"));
+        loginPage().abrirPortalLogin();
+        loginPage().ejecutarLogin(username, password);
+        transferPage().abrirModuloTransferencias();
     }
 
     @When("realiza la transferencia configurada")
     public void realizaTransferenciaConfigurada() {
         ensureDataLoaded();
-        transferPage().selectFromAccount(required("cuentaorigen"));
-        transferPage().selectToAccount(required("cuentadestino"));
-        transferPage().setAmount(required("monto"));
-        transferPage().submitTransfer();
+        transferPage().seleccionarCuentaOrigen(required("cuentaorigen"));
+        transferPage().seleccionarCuentaDestino(required("cuentadestino"));
+        transferPage().definirMonto(required("monto"));
+        transferPage().enviarTransferencia();
     }
 
     @Then("el mensaje de transferencia coincide con los datos configurados")
@@ -57,7 +51,7 @@ public class TransferenciaStepDefinitions {
         if (mensajeEsperado == null || mensajeEsperado.isBlank()) {
             throw new IllegalStateException("El mensaje esperado no está definido para el caso actual");
         }
-        assertTrue(transferPage().getResponseMessage().contains(mensajeEsperado),
+        assertTrue(transferPage().obtenerMensajeTransferencia().contains(mensajeEsperado),
                 () -> "El mensaje no contiene: " + mensajeEsperado);
     }
 
@@ -68,7 +62,7 @@ public class TransferenciaStepDefinitions {
         if (expected == null || expected.isBlank()) {
             throw new IllegalStateException("El mensaje esperado de alerta no está configurado en el Excel");
         }
-        String actual = transferPage().acceptAlertText();
+        String actual = transferPage().aceptarAlertaYObtenerTexto();
         assertTrue(actual.contains(expected),
                 () -> "Se esperaba alerta: " + expected + " pero se obtuvo: " + actual);
     }
@@ -102,6 +96,6 @@ public class TransferenciaStepDefinitions {
         if (id == null || id.isBlank()) {
             throw new IllegalArgumentException("El identificador de datos no puede ser nulo");
         }
-        return ScenarioDataRepository.getTransferenciaData(id);
+        return ExcelUtils.datosTransferencia(id);
     }
 }

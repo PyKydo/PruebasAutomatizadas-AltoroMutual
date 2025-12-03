@@ -6,9 +6,8 @@ import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import org.example.pages.ConsultaSaldoPage;
 import org.example.pages.LoginPage;
-import org.example.utils.ConfigLoader;
-import org.example.utils.ScenarioDataRepository;
-import org.example.utils.TestContext;
+import org.example.utils.ExcelUtils;
+import org.example.utils.Config;
 
 import java.util.Locale;
 import java.util.Map;
@@ -18,49 +17,45 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ConsultaSaldoStepDefinitions {
 
-    private final TestContext context;
     private Map<String, String> consultaData;
 
-    public ConsultaSaldoStepDefinitions(TestContext context) {
-        this.context = context;
-    }
-
     private LoginPage loginPage() {
-        return context.getPage(LoginPage.class);
+        return Config.pagina(LoginPage.class);
     }
 
     private ConsultaSaldoPage consultaSaldoPage() {
-        return context.getPage(ConsultaSaldoPage.class);
+        return Config.pagina(ConsultaSaldoPage.class);
     }
 
     @Given("el usuario inicia sesión para consultar saldos")
     public void elUsuarioIniciaSesionParaConsultarSaldos() {
-        loginPage().openLoginPage();
-        loginPage().performLogin(ConfigLoader.get("app.username"), ConfigLoader.get("app.password"));
+        loginPage().abrirPortalLogin();
+        loginPage().ejecutarLogin(Config.config("app.username"),
+            Config.config("app.password"));
     }
 
     @When("selecciona la cuenta configurada {string} desde el panel principal")
     public void seleccionaLaCuentaConfigurada(String caso) {
-        consultaData = ScenarioDataRepository.getConsultaSaldoData(caso);
-        consultaSaldoPage().selectAccount(value("cuenta"));
+        consultaData = ExcelUtils.datosConsultaSaldo(caso);
+        consultaSaldoPage().seleccionarCuenta(value("cuenta"));
     }
 
     @And("confirma la consulta del historial de la cuenta")
     public void confirmaLaConsultaDelHistorialDeLaCuenta() {
-        consultaSaldoPage().requestHistory();
+        consultaSaldoPage().solicitarHistorial();
     }
 
     @Then("el encabezado de historial coincide con los datos configurados")
     public void elEncabezadoDeHistorialCoincide() {
         ensureConsultaData();
-        String titulo = consultaSaldoPage().getHistoryTitle();
+        String titulo = consultaSaldoPage().obtenerTituloHistorial();
         assertTrue(titulo.contains(value("cuenta")),
                 "El encabezado no contiene el identificador de cuenta esperado.");
     }
 
     @And("el detalle de balance presenta un monto disponible")
     public void elDetalleDeBalancePresentaUnMontoDisponible() {
-        String balance = consultaSaldoPage().getBalanceValue();
+        String balance = consultaSaldoPage().obtenerSaldoFinal();
         assertFalse(balance.trim().isEmpty(), "El monto de balance no debería estar vacío.");
     }
 

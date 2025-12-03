@@ -1,6 +1,6 @@
 package org.example.pages;
 
-import org.example.utils.ConfigLoader;
+import org.example.utils.Config;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 
@@ -21,25 +21,25 @@ public class BusquedaNavegacionPage extends BasePage {
         super(driver);
     }
 
-    public void openHomePage() {
-        navigateWithRetry(ConfigLoader.get("app.baseUrl"));
+    public void abrirHome() {
+        navegarConReintentos(Config.config("app.baseUrl"));
     }
 
-    public void searchFor(String term) {
-        type(SEARCH_INPUT, term);
-        click(SEARCH_BUTTON);
-        waitForVisibility(MAIN_HEADING);
+    public void buscarTermino(String term) {
+        ingresarTexto(SEARCH_INPUT, term);
+        hacerClick(SEARCH_BUTTON);
+        esperarVisibilidad(MAIN_HEADING);
     }
 
-    public void navigateToSection(String section) {
+    public void irASeccion(String section) {
         By locator = SECTION_LINKS.get(section.toLowerCase());
         if (locator == null) {
             throw new IllegalArgumentException("Sección no soportada: " + section);
         }
-        click(locator);
+        hacerClick(locator);
     }
 
-    public String getMainHeadingText() {
-        return getText(MAIN_HEADING);
+    public String obtenerTituloPrincipal() {
+        return obtenerTexto(MAIN_HEADING);
     }
 }

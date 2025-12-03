@@ -6,9 +6,8 @@ import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import org.example.pages.LoginPage;
 import org.example.pages.SolicitudTarjetaPage;
-import org.example.utils.ConfigLoader;
-import org.example.utils.ScenarioDataRepository;
-import org.example.utils.TestContext;
+import org.example.utils.ExcelUtils;
+import org.example.utils.Config;
 
 import java.util.Locale;
 import java.util.Map;
@@ -22,38 +21,34 @@ public class SolicitudTarjetaStepDefinitions {
             "rechazado", "Login Failed: We're sorry"
     );
 
-    private final TestContext context;
     private Map<String, String> solicitudData;
 
-    public SolicitudTarjetaStepDefinitions(TestContext context) {
-        this.context = context;
-    }
-
     private LoginPage loginPage() {
-        return context.getPage(LoginPage.class);
+        return Config.pagina(LoginPage.class);
     }
 
     private SolicitudTarjetaPage solicitudPage() {
-        return context.getPage(SolicitudTarjetaPage.class);
+        return Config.pagina(SolicitudTarjetaPage.class);
     }
 
     @Given("el usuario autenticado accede a la solicitud de tarjeta")
     public void elUsuarioAutenticadoAccedeALaSolicitudDeTarjeta() {
         LoginPage login = loginPage();
-        login.openLoginPage();
-        login.performLogin(ConfigLoader.get("app.username"), ConfigLoader.get("app.password"));
-        solicitudPage().openApplicationForm();
+        login.abrirPortalLogin();
+        login.ejecutarLogin(Config.config("app.username"),
+            Config.config("app.password"));
+        solicitudPage().abrirFormularioSolicitud();
     }
 
     @When("ingresa la contraseña configurada {string}")
     public void ingresaLaContrasenaConfigurada(String caso) {
-        solicitudData = ScenarioDataRepository.getSolicitudTarjetaData(caso);
-        solicitudPage().typeApplicationPassword(value("clave"));
+        solicitudData = ExcelUtils.datosSolicitud(caso);
+        solicitudPage().ingresarClaveSolicitud(value("password", "clave", "contrasena", "contraseña"));
     }
 
     @And("envía la solicitud de tarjeta")
     public void enviaLaSolicitudDeTarjeta() {
-        solicitudPage().submitApplication();
+        solicitudPage().enviarSolicitud();
     }
 
     @Then("el mensaje de solicitud coincide con los datos configurados")
@@ -64,7 +59,7 @@ public class SolicitudTarjetaStepDefinitions {
         if (esperado == null) {
             throw new IllegalArgumentException("Resultado no soportado: " + tipoResultado);
         }
-        String mensaje = solicitudPage().getApplicationMessage();
+        String mensaje = solicitudPage().obtenerMensajeSolicitud();
         assertTrue(mensaje.contains(esperado),
                 () -> "El mensaje obtenido no coincide con el tipo esperado: " + tipoResultado);
     }
@@ -75,10 +70,20 @@ public class SolicitudTarjetaStepDefinitions {
         }
     }
 
-    private String value(String key) {
-        if (solicitudData == null) {
+    private String value(String... keys) {
+        if (solicitudData == null || keys == null) {
             return "";
         }
-        return solicitudData.getOrDefault(key.toLowerCase(Locale.ROOT), "");
+        for (String key : keys) {
+            if (key == null) {
+                continue;
+            }
+            String normalized = key.toLowerCase(Locale.ROOT);
+            String value = solicitudData.get(normalized);
+            if (value != null && !value.isEmpty()) {
+                return value;
+            }
+        }
+        return "";
     }
 }

@@ -4,40 +4,34 @@ import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import org.example.pages.BusquedaNavegacionPage;
-import org.example.utils.TestContext;
+import org.example.utils.Config;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class BusquedaNavegacionStepDefinitions {
 
-    private final TestContext context;
-
-    public BusquedaNavegacionStepDefinitions(TestContext context) {
-        this.context = context;
-    }
-
     private BusquedaNavegacionPage page() {
-        return context.getPage(BusquedaNavegacionPage.class);
+        return Config.pagina(BusquedaNavegacionPage.class);
     }
 
     @Given("el usuario accede al portal principal de Altoro Mutual")
     public void elUsuarioAccedeAlPortalPrincipal() {
-        page().openHomePage();
+        page().abrirHome();
     }
 
     @When("el usuario busca el término {string}")
     public void elUsuarioBuscaElTermino(String termino) {
-        page().searchFor(termino);
+        page().buscarTermino(termino);
     }
 
     @When("el usuario navega a la sección {string}")
     public void elUsuarioNavegaALaSeccion(String seccion) {
-        page().navigateToSection(seccion);
+        page().irASeccion(seccion);
     }
 
     @Then("el encabezado principal contiene {string}")
     public void elEncabezadoPrincipalContiene(String textoEsperado) {
-        String heading = page().getMainHeadingText();
+        String heading = page().obtenerTituloPrincipal();
         assertTrue(heading.contains(textoEsperado),
                 () -> "El encabezado no contiene el texto esperado: " + textoEsperado);
     }

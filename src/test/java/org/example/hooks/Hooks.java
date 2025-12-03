@@ -3,7 +3,8 @@ package org.example.hooks;
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
 import io.cucumber.java.Scenario;
-import org.example.utils.TestContext;
+import org.example.utils.Driver;
+import org.example.utils.Config;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
@@ -13,30 +14,25 @@ import org.slf4j.LoggerFactory;
 public class Hooks {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Hooks.class);
-    private final TestContext testContext;
-
-    public Hooks(TestContext testContext) {
-        this.testContext = testContext;
-    }
-
     @Before
-    public void setUp(Scenario scenario) {
+    public void iniciarEscenario(Scenario scenario) {
         LOGGER.info("Iniciando escenario: {}", scenario.getName());
-        testContext.initDriver();
+        Driver.iniciar();
     }
 
     @After
-    public void tearDown(Scenario scenario) {
+    public void finalizarEscenario(Scenario scenario) {
         LOGGER.info("Finalizando escenario: {} - Estado: {}", scenario.getName(), scenario.getStatus());
         if (scenario.isFailed()) {
-            attachScreenshot(scenario);
+            adjuntarEvidencia(scenario);
         }
-        testContext.cleanupDriver();
+        Driver.cerrar();
+        Config.limpiarCachePaginas();
     }
 
-    private void attachScreenshot(Scenario scenario) {
+    private void adjuntarEvidencia(Scenario scenario) {
         try {
-            WebDriver driver = testContext.getDriver();
+            WebDriver driver = Driver.driver();
             if (driver instanceof TakesScreenshot) {
                 byte[] screenshot = ((TakesScreenshot) driver).getScreenshotAs(OutputType.BYTES);
                 scenario.attach(screenshot, "image/png", "failure-" + scenario.getName());

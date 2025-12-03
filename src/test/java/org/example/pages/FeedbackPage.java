@@ -1,6 +1,6 @@
 package org.example.pages;
 
-import org.example.utils.ConfigLoader;
+import org.example.utils.Config;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 
@@ -17,22 +17,22 @@ public class FeedbackPage extends BasePage {
         super(driver);
     }
 
-    public void openPage() {
-        navigateWithRetry(ConfigLoader.get("app.baseUrl") + "/feedback.jsp");
+    public void abrirFeedback() {
+        navegarConReintentos(Config.config("app.baseUrl") + "/feedback.jsp");
     }
 
-    public void fillForm(String nombre, String email, String asunto, String mensaje) {
-        type(NAME_INPUT, nombre);
-        type(EMAIL_INPUT, email);
-        type(SUBJECT_INPUT, asunto);
-        type(MESSAGE_TEXTAREA, mensaje);
+    public void completarFormulario(String nombre, String email, String asunto, String mensaje) {
+        ingresarTexto(NAME_INPUT, nombre);
+        ingresarTexto(EMAIL_INPUT, email);
+        ingresarTexto(SUBJECT_INPUT, asunto);
+        ingresarTexto(MESSAGE_TEXTAREA, mensaje);
     }
 
-    public void submit() {
-        click(SUBMIT_BUTTON);
+    public void enviarFormulario() {
+        hacerClick(SUBMIT_BUTTON);
     }
 
-    public String getResponseMessage() {
-        return getText(RESPONSE_PARAGRAPH);
+    public String obtenerMensajeRespuesta() {
+        return obtenerTexto(RESPONSE_PARAGRAPH);
     }
 }
