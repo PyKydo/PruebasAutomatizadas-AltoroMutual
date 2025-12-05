@@ -49,8 +49,9 @@ public class ConsultaSaldoStepDefinitions {
     public void elEncabezadoDeHistorialCoincide() {
         ensureConsultaData();
         String titulo = consultaSaldoPage().obtenerTituloHistorial();
-        assertTrue(titulo.contains(value("cuenta")),
-                "El encabezado no contiene el identificador de cuenta esperado.");
+        String esperado = headingExpectation();
+        assertTrue(titulo.contains(esperado),
+            () -> "El encabezado no contiene el valor esperado: " + esperado + ". Texto mostrado: " + titulo);
     }
 
     @And("el detalle de balance presenta un monto disponible")
@@ -70,5 +71,16 @@ public class ConsultaSaldoStepDefinitions {
             return "";
         }
         return consultaData.getOrDefault(key.toLowerCase(Locale.ROOT), "");
+    }
+
+    private String headingExpectation() {
+        String[] keys = {"titulo", "encabezado", "heading", "titularesperado", "cuenta"};
+        for (String key : keys) {
+            String candidate = value(key);
+            if (candidate != null && !candidate.isBlank()) {
+                return candidate;
+            }
+        }
+        throw new IllegalStateException("No se encontró un valor esperado para el encabezado en el dataset actual");
     }
 }
